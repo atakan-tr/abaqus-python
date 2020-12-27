@@ -1,0 +1,207 @@
+# -*- coding: mbcs -*-
+# Do not delete the following import lines
+from abaqus import *
+from abaqusConstants import *
+import __main__
+import numpy
+
+import section
+import regionToolset
+import displayGroupMdbToolset as dgm
+import part
+import material
+import assembly
+import step
+import interaction
+import load
+import mesh
+import optimization
+import job
+import sketch
+import visualization
+import xyPlot
+import displayGroupOdbToolset as dgo
+import connectorBehavior
+
+z =1
+x =0
+y=0
+q=0
+m=0
+n=0
+l=0
+
+for x in range(0, 46, 45):
+    for y in range(0, 46, 45):
+        for q in range(0, 46, 45):
+                        mdb.Model(name='Model-2' + str(x) + "--"+ str(y)+ "--" + str(q) ,
+                                  modelType=STANDARD_EXPLICIT)
+                        session.viewports['Viewport: 1'].setValues(displayedObject=None)
+                        s = mdb.models[
+                            'Model-2' + str(x)+ "--" + str(y) + "--"+ str(q) ].ConstrainedSketch(
+                            name='__profile__',
+                            sheetSize=200.0)
+                        g, v, d, c = s.geometry, s.vertices, s.dimensions, s.constraints
+                        s.setPrimaryObject(option=STANDALONE)
+                        s.rectangle(point1=(-22.5, 17.5), point2=(52.5, -16.25))
+                        s.ObliqueDimension(vertex1=v[1], vertex2=v[2], textPoint=(2.96701049804688,
+                                                                                  -24.5284519195557), value=130.0)
+                        s.ObliqueDimension(vertex1=v[0], vertex2=v[1], textPoint=(-32.0666007995605,
+                                                                                  0.0569114685058594), value=70.0)
+                        p = mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].Part(
+                            name='Part-1', dimensionality=THREE_D,
+                            type=DEFORMABLE_BODY)
+                        p = mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].parts['Part-1']
+                        p.BaseShell(sketch=s)
+                        s.unsetPrimaryObject()
+                        p = mdb.models['Model-2' + str(x)+ "--" + str(y) + "--"+ str(q) ].parts['Part-1']
+                        session.viewports['Viewport: 1'].setValues(displayedObject=p)
+                        del mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].sketches[
+                            '__profile__']
+                        session.viewports['Viewport: 1'].partDisplay.setValues(sectionAssignments=ON,
+                                                                               engineeringFeatures=ON)
+                        session.viewports['Viewport: 1'].partDisplay.geometryOptions.setValues(
+                            referenceRepresentation=OFF)
+                        mdb.models['Model-2' + str(x) + "--"+ str(y)+ "--" + str(q) ].Material(
+                            name='Material-1')
+                        mdb.models['Model-2' + str(x) + "--"+ str(y) + "--"+ str(q) ].materials[
+                            'Material-1'].Elastic(
+                            type=ENGINEERING_CONSTANTS, table=((130000.0, 9500.0, 9500.0, 0.28,
+                                                                0.28, 0.4, 5200.0, 5200.0, 1450.0),))
+                        layupOrientation = None
+                        p = mdb.models['Model-2' + str(x) + "--"+ str(y)+ "--" + str(q) ].parts['Part-1']
+                        f = p.faces
+                        faces = f.getSequenceFromMask(mask=('[#1 ]',), )
+                        region1 = regionToolset.Region(faces=faces)
+                        p = mdb.models['Model-2' + str(x) + "--"+ str(y)+ "--" + str(q) ].parts['Part-1']
+                        f = p.faces
+                        faces = f.getSequenceFromMask(mask=('[#1 ]',), )
+                        region2 = regionToolset.Region(faces=faces)
+                        p = mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].parts['Part-1']
+                        f = p.faces
+                        faces = f.getSequenceFromMask(mask=('[#1 ]',), )
+                        region3 = regionToolset.Region(faces=faces)
+                        compositeLayup = \
+                        mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].parts[
+                            'Part-1'].CompositeLayup(
+                            name='CompositeLayup-1', description='', elementType=SHELL,
+                            offsetType=MIDDLE_SURFACE, symmetric=True,
+                            thicknessAssignment=FROM_SECTION)
+                        compositeLayup.Section(preIntegrate=OFF, integrationRule=SIMPSON,
+                                               thicknessType=UNIFORM, poissonDefinition=DEFAULT, temperature=GRADIENT,
+                                               useDensity=OFF)
+                        compositeLayup.ReferenceOrientation(orientationType=GLOBAL, localCsys=None,
+                                                            fieldName='', additionalRotationType=ROTATION_NONE,
+                                                            angle=0.0,
+                                                            axis=AXIS_3)
+                        compositeLayup.CompositePly(suppressed=False, plyName='Ply-1',
+                                                    region=region1, material='Material-1',
+                                                    thicknessType=SPECIFY_THICKNESS,
+                                                    thickness=0.3, orientationType=SPECIFY_ORIENT, orientationValue=x,
+                                                    additionalRotationType=ROTATION_NONE, additionalRotationField='',
+                                                    axis=AXIS_3, angle=0.0, numIntPoints=3)
+                        compositeLayup.CompositePly(suppressed=False, plyName='Ply-2', region=region2,
+                                                    material='Material-1', thicknessType=SPECIFY_THICKNESS,
+                                                    thickness=0.3,
+                                                    orientationType=SPECIFY_ORIENT, orientationValue=y,
+                                                    additionalRotationType=ROTATION_NONE, additionalRotationField='',
+                                                    axis=AXIS_3, angle=0.0, numIntPoints=3)
+                        compositeLayup.CompositePly(suppressed=False, plyName='Ply-3', region=region2,
+                                                    material='Material-1', thicknessType=SPECIFY_THICKNESS,
+                                                    thickness=0.3,
+                                                    orientationType=SPECIFY_ORIENT, orientationValue=q,
+                                                    additionalRotationType=ROTATION_NONE, additionalRotationField='',
+                                                    axis=AXIS_3, angle=0.0, numIntPoints=3)
+                        a = mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].rootAssembly
+                        session.viewports['Viewport: 1'].setValues(displayedObject=a)
+                        session.viewports['Viewport: 1'].assemblyDisplay.setValues(
+                            optimizationTasks=OFF, geometricRestrictions=OFF, stopConditions=OFF)
+                        a = mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].rootAssembly
+                        a.DatumCsysByDefault(CARTESIAN)
+                        p = mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].parts['Part-1']
+                        a.Instance(name='Part-1-1', part=p, dependent=ON)
+                        session.viewports['Viewport: 1'].view.setValues(nearPlane=272.922,
+                                                                        farPlane=317.671, width=158.41, height=81.7869,
+                                                                        viewOffsetX=0.804641,
+                                                                        viewOffsetY=2.51391)
+                        session.viewports['Viewport: 1'].assemblyDisplay.setValues(
+                            adaptiveMeshConstraints=ON)
+                        mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].StaticStep(
+                            name='Step-1', previous='Initial')
+                        session.viewports['Viewport: 1'].assemblyDisplay.setValues(step='Step-1')
+                        session.viewports['Viewport: 1'].assemblyDisplay.setValues(mesh=ON,
+                                                                                   adaptiveMeshConstraints=OFF)
+                        session.viewports['Viewport: 1'].assemblyDisplay.meshOptions.setValues(
+                            meshTechnique=ON)
+                        p = mdb.models['Model-2' + str(x) + "--"+ str(y)+ "--" + str(q) ].parts['Part-1']
+                        session.viewports['Viewport: 1'].setValues(displayedObject=p)
+                        session.viewports['Viewport: 1'].partDisplay.setValues(sectionAssignments=OFF,
+                                                                               engineeringFeatures=OFF, mesh=ON)
+                        session.viewports['Viewport: 1'].partDisplay.meshOptions.setValues(
+                            meshTechnique=ON)
+                        p = mdb.models['Model-2' + str(x) + "--"+ str(y)+ "--" + str(q) ].parts['Part-1']
+                        p.seedPart(size=2.0, deviationFactor=0.1, minSizeFactor=0.1)
+                        p = mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].parts['Part-1']
+                        p.generateMesh()
+                        a = mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].rootAssembly
+                        a.regenerate()
+                        a = mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].rootAssembly
+                        session.viewports['Viewport: 1'].setValues(displayedObject=a)
+                        session.viewports['Viewport: 1'].assemblyDisplay.setValues(mesh=OFF, loads=ON,
+                                                                                   bcs=ON, predefinedFields=ON,
+                                                                                   connectors=ON)
+                        session.viewports['Viewport: 1'].assemblyDisplay.meshOptions.setValues(
+                            meshTechnique=OFF)
+                        a = mdb.models['Model-2' + str(x) + "--"+ str(y)+ "--" + str(q) ].rootAssembly
+                        e1 = a.instances['Part-1-1'].edges
+                        edges1 = e1.getSequenceFromMask(mask=('[#2 ]',), )
+                        region = a.Set(edges=edges1, name='Set-1')
+                        mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].EncastreBC(
+                            name='BC-1', createStepName='Step-1',
+                            region=region, localCsys=None)
+                        a = mdb.models['Model-2' + str(x) + "--"+ str(y)+ "--" + str(q) ].rootAssembly
+                        e1 = a.instances['Part-1-1'].edges
+                        edges1 = e1.getSequenceFromMask(mask=('[#8 ]',), )
+                        region = a.Set(edges=edges1, name='Set-2')
+                        mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].DisplacementBC(
+                            name='BC-2', createStepName='Step-1',
+                            region=region, u1=UNSET, u2=0.0, u3=0.0, ur1=0.0, ur2=0.0, ur3=0.0,
+                            amplitude=UNSET, fixed=OFF, distributionType=UNIFORM, fieldName='',
+                            localCsys=None)
+                        a = mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].rootAssembly
+                        s1 = a.instances['Part-1-1'].edges
+                        side1Edges1 = s1.getSequenceFromMask(mask=('[#8 ]',), )
+                        region = a.Surface(side1Edges=side1Edges1, name='Surf-1')
+                        mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].ShellEdgeLoad(
+                            name='Load-1', createStepName='Step-1',
+                            region=region, magnitude=100, distributionType=UNIFORM, field='',
+                            localCsys=None)
+                        session.viewports['Viewport: 1'].partDisplay.setValues(sectionAssignments=ON,
+                                                                               engineeringFeatures=ON, mesh=OFF)
+                        session.viewports['Viewport: 1'].partDisplay.meshOptions.setValues(
+                            meshTechnique=OFF)
+                        p = mdb.models['Model-2' + str(x) + "--"+ str(y) + "--"+ str(q) ].parts['Part-1']
+                        session.viewports['Viewport: 1'].setValues(displayedObject=p)
+                        a = mdb.models['Model-2' + str(x)+ "--" + str(y)+ "--" + str(q) ].rootAssembly
+                        session.viewports['Viewport: 1'].setValues(displayedObject=a)
+                        session.viewports['Viewport: 1'].assemblyDisplay.setValues(loads=OFF, bcs=OFF,
+                                                                                   predefinedFields=OFF, connectors=OFF)
+                        mdb.Job(name='Job-1' + str(x)+ "--" + str(y)+ "--" + str(q) ,
+                                model='Model-2' + str(x)+ "--" + str(y) + "--"+ str(q) , description='',
+                                type=ANALYSIS,
+                                atTime=None, waitMinutes=0, waitHours=0, queue=None, memory=90,
+                                memoryUnits=PERCENTAGE, getMemoryFromAnalysis=True,
+                                explicitPrecision=SINGLE, nodalOutputPrecision=SINGLE, echoPrint=OFF,
+                                modelPrint=OFF, contactPrint=OFF, historyPrint=OFF, userSubroutine='',
+                                scratch='', resultsFormat=ODB, multiprocessingMode=DEFAULT, numCpus=1,
+                                numGPUs=0)
+                        mdb.jobs['Job-1' + str(x) + "--"+ str(y)+ "--" + str(q) ].submit(consistencyChecking=OFF, datacheckJob=True)
+for x in range(0, 46, 45):
+    for y in range(0, 46, 45):
+        for q in range(0, 46, 45):
+            mdb.jobs['Job-1' + str(x) + "--" + str(y) + "--" + str(q)].submit(consistencyChecking=OFF)
+session.viewports['Viewport: 1'].odbDisplay.contourOptions.setValues(
+                showMaxLocation=ON)
+
+
+
